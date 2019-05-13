@@ -75,6 +75,9 @@ void imprimeCampeonato(Campeonato *campeonato);
 void imprimeRodada(Rodada* rodada);
 void limparTela();
 
+// Leituras
+Campeonato* lerDadosDoArquivo(Campeonato* campeonato, char* filename);
+
 // Mensagem de aviso
 char _mensagem_aviso[255];
 void setMensagemAviso(char *msg);
@@ -85,9 +88,19 @@ int main() {
 
 	limparTela();
 
+	Campeonato *campeonato;
+
+	campeonato = criarCampeonatoFake();
+
+	campeonato = lerDadosDoArquivo(campeonato, "times.dat");
+
 	imprimeCampeonato(
-		criarCampeonatoFake()
+			campeonato
 	);
+
+	imprimeMensagemAviso();
+	imprimeMensagemAviso();
+	imprimeMensagemAviso();
 
 	return 0;
 }
@@ -192,6 +205,26 @@ Campeonato* adicionarRodada(Campeonato* campeonato, Rodada* rodada) {
 	return campeonato;
 }
 
+
+Campeonato* lerDadosDoArquivo(Campeonato* campeonato, char* filename) {
+
+	FILE *arquivo;
+
+//	arquivo = fopen("file", "w");
+//	if (!arquivo) {
+//		char aux[128];
+//		sprintf(aux, "Nao foi possivel abrir %s", filename);
+//		setMensagemAviso(aux);
+//		return campeonato;
+//	}
+//	fclose(arquivo);
+
+	free(arquivo);
+
+	return campeonato;
+}
+
+
 Campeonato* criarCampeonatoFake() {
 
 	Campeonato *campeonato;
@@ -234,7 +267,7 @@ Campeonato* criarCampeonatoFake() {
 }
 Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 
-	// Todo
+	// Todo gerar rodadas a partir de times
 	Rodada *rd = criarRodada(1);
 	adicionarJogo(rd,
 			criarJogo(
@@ -260,7 +293,7 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 						&campeonato->times[0],
 						&campeonato->times[2],
 						1,
-						criarDataHora(2019, 6, 12, 13, 30)
+						criarDataHora(2019, 5, 12, 13, 30)
 				)
 		);
 		adicionarJogo(rd,
@@ -268,7 +301,7 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 						&campeonato->times[1],
 						&campeonato->times[3],
 						2,
-						criarDataHora(2019, 6, 12, 14, 00)
+						criarDataHora(2019, 5, 12, 14, 00)
 				)
 		);
 	adicionarRodada(campeonato, rd);
@@ -279,7 +312,7 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 						&campeonato->times[0],
 						&campeonato->times[3],
 						1,
-						criarDataHora(2019, 6, 13, 11, 15)
+						criarDataHora(2019, 5, 13, 11, 15)
 				)
 		);
 		adicionarJogo(rd,
@@ -287,11 +320,10 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 						&campeonato->times[1],
 						&campeonato->times[2],
 						2,
-						criarDataHora(2019, 6, 13, 11, 45)
+						criarDataHora(2019, 5, 13, 11, 45)
 				)
 		);
 	adicionarRodada(campeonato, rd);
-	// Todo fim
 
 	return campeonato;
 }
@@ -322,7 +354,7 @@ void imprimeRodada(Rodada* rodada) {
 	printf("\n");
 }
 void limparTela() {
-	// TODO fazer um if para caso seja windows (ou nao)
+	// TODO validar caso seja windows
 	printf("\e[1;1H\e[2J");
 }
 
