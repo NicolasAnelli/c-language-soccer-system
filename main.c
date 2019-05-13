@@ -1,6 +1,11 @@
+/**
+ * 13/05/19 - 20/05/19 - 27/05/19
+ **/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 // Data
 typedef struct {
@@ -28,10 +33,10 @@ typedef struct {
 
 // Jogo
 typedef struct {
-	Time timeA;
-	Time timeB;
+	Time *timeA;
+	Time *timeB;
 	int mesa;
-	Data data;
+	Data *data;
 	int jaOcorreu;
 	Placar *placar;
 } Jogo;
@@ -48,6 +53,8 @@ typedef struct {
 	int ano;
 	int nRodadas;
 	Rodada *rodadas;
+	int nTimes;
+	Time *times;
 } Campeonato;
 
 // Assinaturas
@@ -63,6 +70,7 @@ Campeonato* adicionarRodada(Campeonato* campeonato, Rodada* rodada);
 
 // Helpers
 Campeonato* criarCampeonatoFake();
+Campeonato* autoCriarRodadas(Campeonato* campeonato);
 void imprimeCampeonato(Campeonato *campeonato);
 void imprimeRodada(Rodada* rodada);
 void limparTela();
@@ -94,7 +102,7 @@ Data* criarData(int ano, int mes, int dia){
 	data->temHora = 0;
 	data->hora = 0;
 	data->minuto = 0;
-	sprintf(data->toString, "%d/%d/%d", data->dia, data->mes, data->ano);
+	sprintf(data->toString, "%02d/%02d/%04d", data->dia, data->mes, data->ano);
 
 	return data;
 }
@@ -106,7 +114,7 @@ Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto) {
 	data->minuto = minuto;
 
 	char str[10];
-	sprintf(str, " as %d:%d", data->hora, data->minuto);
+	sprintf(str, " as %02d:%02d", data->hora, data->minuto);
 	strcat(data->toString, str);
 
 	return data;
@@ -123,10 +131,10 @@ Time* criarTime(char nome[50], char resp[50], Data *fund) {
 Jogo* criarJogo(Time* timeA, Time* timeB, int mesa, Data* data) {
 
 	Jogo* jogo = (Jogo*)malloc(sizeof(Jogo));
-	jogo->timeA = *timeA;
-	jogo->timeB = *timeB;
+	jogo->timeA = timeA;
+	jogo->timeB = timeB;
 	jogo->mesa = mesa;
-	jogo->data = *data;
+	jogo->data = data;
 	jogo->jaOcorreu = 0;
 	jogo->placar = (Placar*)malloc(sizeof(Placar));
 	jogo->placar->timeA = 0;
@@ -164,8 +172,17 @@ Campeonato* criarCampeonato(int ano) {
 	camp->ano = ano;
 	camp->nRodadas = 0;
 	camp->rodadas = (Rodada*)malloc(38*sizeof(Rodada));
+	camp->nTimes = 0;
+	camp->times = (Time*)malloc(20*sizeof(Time));
 
 	return camp;
+}
+Campeonato* adicionarTime(Campeonato* campeonato, Time* time) {
+
+	campeonato->times[campeonato->nTimes] = *time;
+	campeonato->nTimes += 1;
+
+	return campeonato;
 }
 Campeonato* adicionarRodada(Campeonato* campeonato, Rodada* rodada) {
 
@@ -180,29 +197,59 @@ Campeonato* criarCampeonatoFake() {
 	Campeonato *campeonato;
 	campeonato = criarCampeonato(2019);
 
+	campeonato = adicionarTime(campeonato, criarTime("Time A", "Jogador A",
+			criarData(2007, 2, 5)
+	));
+	campeonato = adicionarTime(campeonato, criarTime("Time B", "Jogador B",
+			criarData(2008, 3, 6)
+	));
+	campeonato = adicionarTime(campeonato, criarTime("Time C", "Jogador C",
+			criarData(2009, 4, 7)
+	));
+	campeonato = adicionarTime(campeonato, criarTime("Time D", "Jogador D",
+			criarData(2010, 5, 8)
+	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time E", "Jogador E",
+//			criarData(2010, 5, 10)
+//	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time F", "Jogador F",
+//			criarData(2010, 4, 10)
+//	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time G", "Jogador G",
+//			criarData(2002, 7, 5)
+//	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time H", "Jogador H",
+//			criarData(2004, 12, 5)
+//	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time I", "Jogador I",
+//			criarData(2005, 5, 25)
+//	));
+//	campeonato = adicionarTime(campeonato, criarTime("Time J", "Jogador J",
+//			criarData(2017, 11, 15)
+//	));
+
+	campeonato = autoCriarRodadas(campeonato);
+
+	return campeonato;
+}
+Campeonato* autoCriarRodadas(Campeonato* campeonato) {
+
+	// Todo
 	Rodada *rd = criarRodada(1);
 	adicionarJogo(rd,
 			criarJogo(
-					criarTime("Time A", "Jogador A",
-							criarData(2010, 05, 10)
-					),
-					criarTime("Time B", "Jogador B",
-							criarData(2008, 07, 07)
-					),
+					&campeonato->times[0],
+					&campeonato->times[1],
 					1,
-					criarDataHora(2019, 5, 10, 22, 30)
+					criarDataHora(2019, 5, 11, 12, 00)
 			)
 	);
 	adicionarJogo(rd,
 			criarJogo(
-					criarTime("Time C", "Jogador C",
-							criarData(2010, 03, 03)
-					),
-					criarTime("Time D", "Jogador D",
-							criarData(2008, 04, 07)
-					),
+					&campeonato->times[2],
+					&campeonato->times[3],
 					2,
-					criarDataHora(2019, 5, 10, 22, 45)
+					criarDataHora(2019, 5, 11, 12, 30)
 			)
 	);
 	adicionarRodada(campeonato, rd);
@@ -210,29 +257,41 @@ Campeonato* criarCampeonatoFake() {
 	rd = criarRodada(2);
 		adicionarJogo(rd,
 				criarJogo(
-						criarTime("Time A", "Jogador A",
-								criarData(2010, 05, 10)
-						),
-						criarTime("Time C", "Jogador C",
-								criarData(2008, 07, 07)
-						),
+						&campeonato->times[0],
+						&campeonato->times[2],
 						1,
-						criarDataHora(2019, 6, 10, 19, 30)
+						criarDataHora(2019, 6, 12, 13, 30)
 				)
 		);
 		adicionarJogo(rd,
 				criarJogo(
-						criarTime("Time B", "Jogador B",
-								criarData(2010, 03, 03)
-						),
-						criarTime("Time D", "Jogador D",
-								criarData(2008, 04, 07)
-						),
+						&campeonato->times[1],
+						&campeonato->times[3],
 						2,
-						criarDataHora(2019, 6, 10, 19, 45)
+						criarDataHora(2019, 6, 12, 14, 00)
 				)
 		);
 	adicionarRodada(campeonato, rd);
+
+	rd = criarRodada(3);
+		adicionarJogo(rd,
+				criarJogo(
+						&campeonato->times[0],
+						&campeonato->times[3],
+						1,
+						criarDataHora(2019, 6, 13, 11, 15)
+				)
+		);
+		adicionarJogo(rd,
+				criarJogo(
+						&campeonato->times[1],
+						&campeonato->times[2],
+						2,
+						criarDataHora(2019, 6, 13, 11, 45)
+				)
+		);
+	adicionarRodada(campeonato, rd);
+	// Todo fim
 
 	return campeonato;
 }
@@ -254,11 +313,11 @@ void imprimeRodada(Rodada* rodada) {
 	for (i=0; i<rodada->nJogos; i++) {
 		printf("\tJogo %i: %s [%i X %i] %s - %s \n",
 				i+1,
-				rodada->jogos[i].timeA.nome,
+				rodada->jogos[i].timeA->nome,
 				rodada->jogos[i].placar->timeA,
 				rodada->jogos[i].placar->timeB,
-				rodada->jogos[i].timeB.nome,
-				rodada->jogos[i].data.toString);
+				rodada->jogos[i].timeB->nome,
+				rodada->jogos[i].data->toString);
 	}
 	printf("\n");
 }
