@@ -15,31 +15,28 @@ campeonato.
 Você se interessou em fazer esse projeto, e portanto deve estar atento às regras
 presentes no campeonato, a saber:
 
-* Existem 20 times cada um possui um nome, um responsável (aquele que joga), uma data de
-fundação.
-* Os jogos acontecem em turno e returno, ou seja, cada time joga 2 vezes com cada um dos
-outros times. Os jogos ocorrem no ginásio da cidade onde são posicionadas 10 mesas
-numeradas e aí está dada uma rodada do campeonato.
-* Cada jogo possui a rodada, nome dos times, data, hora, mesa e o placar final.
-* A pontuação dos jogos é dada pra cada time da seguinte maneira:
-* O time ganhador leva 3 pontos,
-* Empate rende 1 ponto para cada time,
-* O perdedor não leva nada.
-* A tabela de classificação é organizada em ordem decrescente a partir da pontuação, número
+1. Existem 20 times cada um possui um nome, um responsável (aquele que joga), uma data de fundação.
+2. Os jogos acontecem em turno e returno, ou seja, cada time joga 2 vezes com cada um dos outros times. Os jogos ocorrem no ginásio da cidade onde são posicionadas 10 mesas numeradas e aí está dada uma rodada do campeonato.
+3. Cada jogo possui a rodada, nome dos times, data, hora, mesa e o placar final.
+4. A pontuação dos jogos é dada pra cada time da seguinte maneira:
+5. O time ganhador leva 3 pontos,
+6. Empate rende 1 ponto para cada time,
+7. O perdedor não leva nada.
+8. A tabela de classificação é organizada em ordem decrescente a partir da pontuação, número
 de vitórias, gols marcados, saldo de gols e gols sofridos.
-* Ao final do turno e returno o time que estiver na primeira posição da tabela será consagrado
+9. Ao final do turno e returno o time que estiver na primeira posição da tabela será consagrado
 vencedor.
 
 ## Funcionalidades
 
 Seu sistema deverá implementar tais regras utilizando as técnicas de programação vistas durante
 todo o semestre. Entre as funcionalidades que seu sistema deve prover, temos obrigatoriamente:
-* Cadastro de times e jogos:
-* Por digitação, e
-* Por arquivo.
-* Visualização da tabela:
-* Mais atualizada,
-* Em uma dada rodada.
+- Cadastro de times e jogos:
+    - Por digitação
+    - Por arquivo
+- Visualização da tabela:
+    - Mais atualizada
+    - Em uma dada rodada
 
 ## Objetivo
 Por fim, seu programa deverá usar o máximo de funções possíveis, ou seja, você deve

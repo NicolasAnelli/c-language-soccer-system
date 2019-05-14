@@ -7,6 +7,9 @@
 #include <string.h>
 #include <math.h>
 
+#define ARQ_TIMES_DEFAULT "times.dat"
+#define ARQ_JOGOS_DEFAULT "jogos.dat"
+
 // Data
 typedef struct {
 	int dia;
@@ -76,6 +79,9 @@ Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero);
 Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename);
 Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename);
 
+// Funcoes de escrita
+Campeonato* salvarTimesNoArquivo(Campeonato* campeonato, char* filename);
+
 // Funcoes de aviso
 char _mensagem_aviso[255];
 void setMensagemAviso(char *msg);
@@ -99,10 +105,12 @@ int main() {
 	Campeonato *campeonato;
 
 	campeonato = criarCampeonato(2019);
-	lerTimesDoArquivo(campeonato, "times.dat");
-	lerJogosDoArquivo(campeonato, "jogos.dat");
+	lerTimesDoArquivo(campeonato, ARQ_TIMES_DEFAULT);
+	lerJogosDoArquivo(campeonato, ARQ_JOGOS_DEFAULT);
 
 	imprimeCampeonato(campeonato);
+
+	salvarTimesNoArquivo(campeonato, "teste.dat");
 
 	return 0;
 }
@@ -252,7 +260,7 @@ Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename) {
 
 	arquivo = fopen(filename, "r");
 	if (!arquivo) {
-		sprintf(msg, "Nao foi possivel abrir %s", filename);
+		sprintf(msg, "Nao foi possivel abrir %s para leitura dos times.", filename);
 		setMensagemAviso(msg);
 		return campeonato;
 	}
@@ -288,7 +296,7 @@ Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 
 	arquivo = fopen(filename, "r");
 	if (!arquivo) {
-		sprintf(msg, "Nao foi possivel abrir %s", filename);
+		sprintf(msg, "Nao foi possivel abrir %s para leitura dos jogos.", filename);
 		setMensagemAviso(msg);
 		return campeonato;
 	}
@@ -301,7 +309,6 @@ Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 		if(res == EOF)
 			break;
 
-
 		rodada = buscarRodadaPeloNumero(campeonato, numero);
 
 		if (!rodada) {
@@ -311,13 +318,37 @@ Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 		}
 
 		adicionarJogo(rodada,
-				criarJogoComPlacar(
-						buscarTimePorNome(campeonato, nomeTimeA),
-						buscarTimePorNome(campeonato, nomeTimeB),
-						mesa,
-						criarDataHora(ano, mes, dia, hora, minuto),
-						golsTimeA,
-						golsTimeB));
+			criarJogoComPlacar(
+				buscarTimePorNome(campeonato, nomeTimeA), //todo verificar se encontrou o time
+				buscarTimePorNome(campeonato, nomeTimeB), //todo verificar se encontrou o time
+				mesa,
+				criarDataHora(ano, mes, dia, hora, minuto),
+				golsTimeA,
+				golsTimeB));
+	}
+
+	fclose(arquivo);
+
+	return campeonato;
+}
+
+Campeonato* salvarTimesNoArquivo(Campeonato* campeonato, char* filename) {
+
+	FILE *arquivo;
+	char msg[128];
+	int i;
+
+	arquivo = fopen(filename, "w");
+	if (!arquivo) {
+		sprintf(msg, "Nao foi possivel abrir %s para salvar os times.", filename);
+		setMensagemAviso(msg);
+		return campeonato;
+	}
+
+	for (i=0; i<campeonato->nTimes; i++) {
+		fprintf(arquivo, "%s,%s,%d-%d-%d\n",
+				campeonato->times[i].nome, campeonato->times[i].responsavel,
+				campeonato->times[i].fundacao->ano, campeonato->times[i].fundacao->mes, campeonato->times[i].fundacao->dia);
 	}
 
 	fclose(arquivo);
@@ -439,6 +470,7 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 
 	return campeonato;
 }
+
 void imprimeCampeonato(Campeonato *campeonato) {
 
 	int i;
