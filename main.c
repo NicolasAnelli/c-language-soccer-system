@@ -57,10 +57,10 @@ typedef struct {
 	Time *times;
 } Campeonato;
 
-// Assinaturas
+// Funcoes principais
 Data* criarData(int ano, int mes, int dia);
 Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto);
-Time* criarTime(char nome[50], char resp[50], Data *fund);
+Time* criarTime(char* nome, char* resp, Data *fund);
 Jogo* criarJogo(Time* timeA, Time* timeB, int mesa, Data* data);
 Jogo* informarPlacar(Jogo* jogo, int golsTimeA, int golsTimeB);
 Rodada* criarRodada(int numero);
@@ -68,20 +68,28 @@ Rodada* adicionarJogo(Rodada* rodada, Jogo* jogo);
 Campeonato* criarCampeonato(int ano);
 Campeonato* adicionarRodada(Campeonato* campeonato, Rodada* rodada);
 
-// Helpers
+// Funcoes de buscas
+Time* buscarTimePorNome(Campeonato* campeonato, char* nome);
+Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero);
+
+// Funcoes de leituras
+Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename);
+Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename);
+
+// Funcoes de aviso
+char _mensagem_aviso[255];
+void setMensagemAviso(char *msg);
+void imprimeMensagemAviso();
+
+
+// Funcoes helpers
 Campeonato* criarCampeonatoFake();
 Campeonato* autoCriarRodadas(Campeonato* campeonato);
 void imprimeCampeonato(Campeonato *campeonato);
 void imprimeRodada(Rodada* rodada);
+void imprimeTime(Time *time);
 void limparTela();
 
-// Leituras
-Campeonato* lerDadosDoArquivo(Campeonato* campeonato, char* filename);
-
-// Mensagem de aviso
-char _mensagem_aviso[255];
-void setMensagemAviso(char *msg);
-void imprimeMensagemAviso();
 
 // Funcao principal
 int main() {
@@ -90,22 +98,16 @@ int main() {
 
 	Campeonato *campeonato;
 
-	campeonato = criarCampeonatoFake();
+	campeonato = criarCampeonato(2019);
+	lerTimesDoArquivo(campeonato, "times.dat");
+	lerJogosDoArquivo(campeonato, "jogos.dat");
 
-	campeonato = lerDadosDoArquivo(campeonato, "times.dat");
-
-	imprimeCampeonato(
-			campeonato
-	);
-
-	imprimeMensagemAviso();
-	imprimeMensagemAviso();
-	imprimeMensagemAviso();
+	imprimeCampeonato(campeonato);
 
 	return 0;
 }
 
-// Declaracoes
+
 Data* criarData(int ano, int mes, int dia){
 
 	Data* data = (Data*)malloc(sizeof(Data));
@@ -132,7 +134,7 @@ Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto) {
 
 	return data;
 }
-Time* criarTime(char nome[50], char resp[50], Data *fund) {
+Time* criarTime(char* nome, char* resp, Data *fund) {
 
 	Time* time = (Time*)malloc(sizeof(Time));
 	strcpy(time->nome, nome);
@@ -160,6 +162,13 @@ Jogo* informarPlacar(Jogo* jogo, int golsTimeA, int golsTimeB) {
 	jogo->jaOcorreu = 1;
 	jogo->placar->timeA = golsTimeA;
 	jogo->placar->timeB = golsTimeB;
+
+	return jogo;
+}
+Jogo* criarJogoComPlacar(Time* timeA, Time* timeB, int mesa, Data* data, int golsTimeA, int golsTimeB) {
+
+	Jogo* jogo = criarJogo(timeA, timeB, mesa, data);
+	jogo = informarPlacar(jogo, golsTimeA, golsTimeB);
 
 	return jogo;
 }
@@ -205,23 +214,126 @@ Campeonato* adicionarRodada(Campeonato* campeonato, Rodada* rodada) {
 	return campeonato;
 }
 
+Time* buscarTimePorNome(Campeonato* campeonato, char* nome) {
 
-Campeonato* lerDadosDoArquivo(Campeonato* campeonato, char* filename) {
+	int i;
+	for (i=0; i<campeonato->nTimes; i++) {
+		if(!strcmp(campeonato->times[i].nome, nome)) {
+			return &campeonato->times[i];
+		}
+	}
+
+	// todo nenhum time encontrado, devo setar mensagem?
+	return NULL;
+}
+Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero) {
+
+	int i;
+
+	for (i=0; i<campeonato->nRodadas; i++) {
+		if(campeonato->rodadas[i].numero == numero) {
+			return &campeonato->rodadas[i];
+		}
+	}
+
+	// todo nenhuma rodada encontrada, devo setar mensagem?
+	return NULL;
+}
+
+Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename) {
 
 	FILE *arquivo;
+	char msg[128];
+	int res = 0;
 
-//	arquivo = fopen("file", "w");
-//	if (!arquivo) {
-//		char aux[128];
-//		sprintf(aux, "Nao foi possivel abrir %s", filename);
-//		setMensagemAviso(aux);
-//		return campeonato;
-//	}
-//	fclose(arquivo);
+	char nomeTime[50];
+	char resp[50];
+	int ano, mes, dia;
 
-	free(arquivo);
+	arquivo = fopen(filename, "r");
+	if (!arquivo) {
+		sprintf(msg, "Nao foi possivel abrir %s", filename);
+		setMensagemAviso(msg);
+		return campeonato;
+	}
+
+	while (1) {
+
+		res = fscanf(arquivo, " %[^,],%[^,],%d-%d-%d\n", nomeTime, resp, &ano, &mes, &dia);
+
+		if (res == EOF)
+			break;
+
+		campeonato = adicionarTime(campeonato,
+				criarTime(nomeTime, resp,
+						criarData(ano, mes, dia)));
+	};
+
+	fclose(arquivo);
 
 	return campeonato;
+}
+Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
+
+	FILE *arquivo;
+	char msg[128];
+	int res = 0;
+
+	Rodada *rodada;
+	Jogo *jogo;
+
+	char nomeTimeA[50];
+	char nomeTimeB[50];
+	int numero, mesa, ano, mes, dia, hora, minuto, golsTimeA, golsTimeB;
+
+	arquivo = fopen(filename, "r");
+	if (!arquivo) {
+		sprintf(msg, "Nao foi possivel abrir %s", filename);
+		setMensagemAviso(msg);
+		return campeonato;
+	}
+
+	while (1) {
+
+		res = fscanf(arquivo, " %d,%d-%d-%d,%d:%d,%d,%[^,],%[^,],%d,%d\n",
+				&numero, &ano, &mes, &dia, &hora, &minuto, &mesa, nomeTimeA, nomeTimeB, &golsTimeA, &golsTimeB);
+
+		if(res == EOF)
+			break;
+
+
+		rodada = buscarRodadaPeloNumero(campeonato, numero);
+
+		if (!rodada) {
+			rodada = criarRodada(numero);
+			adicionarRodada(campeonato, rodada);
+			rodada = buscarRodadaPeloNumero(campeonato, numero);
+		}
+
+		adicionarJogo(rodada,
+				criarJogoComPlacar(
+						buscarTimePorNome(campeonato, nomeTimeA),
+						buscarTimePorNome(campeonato, nomeTimeB),
+						mesa,
+						criarDataHora(ano, mes, dia, hora, minuto),
+						golsTimeA,
+						golsTimeB));
+	}
+
+	fclose(arquivo);
+
+	return campeonato;
+}
+
+
+void setMensagemAviso(char *msg) {
+	strcpy(_mensagem_aviso, msg);
+}
+void imprimeMensagemAviso() {
+	if(strcmp(_mensagem_aviso, "")) {
+		printf("%s", _mensagem_aviso);
+		strcpy(_mensagem_aviso, "");
+	}
 }
 
 
@@ -268,62 +380,62 @@ Campeonato* criarCampeonatoFake() {
 Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 
 	// Todo gerar rodadas a partir de times
-	Rodada *rd = criarRodada(1);
-	adicionarJogo(rd,
-			criarJogo(
-					&campeonato->times[0],
-					&campeonato->times[1],
-					1,
-					criarDataHora(2019, 5, 11, 12, 00)
-			)
-	);
-	adicionarJogo(rd,
-			criarJogo(
-					&campeonato->times[2],
-					&campeonato->times[3],
-					2,
-					criarDataHora(2019, 5, 11, 12, 30)
-			)
-	);
-	adicionarRodada(campeonato, rd);
-
-	rd = criarRodada(2);
-		adicionarJogo(rd,
-				criarJogo(
-						&campeonato->times[0],
-						&campeonato->times[2],
-						1,
-						criarDataHora(2019, 5, 12, 13, 30)
-				)
-		);
-		adicionarJogo(rd,
-				criarJogo(
-						&campeonato->times[1],
-						&campeonato->times[3],
-						2,
-						criarDataHora(2019, 5, 12, 14, 00)
-				)
-		);
-	adicionarRodada(campeonato, rd);
-
-	rd = criarRodada(3);
-		adicionarJogo(rd,
-				criarJogo(
-						&campeonato->times[0],
-						&campeonato->times[3],
-						1,
-						criarDataHora(2019, 5, 13, 11, 15)
-				)
-		);
-		adicionarJogo(rd,
-				criarJogo(
-						&campeonato->times[1],
-						&campeonato->times[2],
-						2,
-						criarDataHora(2019, 5, 13, 11, 45)
-				)
-		);
-	adicionarRodada(campeonato, rd);
+//	Rodada *rd = criarRodada(1);
+//	adicionarJogo(rd,
+//			criarJogo(
+//					&campeonato->times[0],
+//					&campeonato->times[1],
+//					1,
+//					criarDataHora(2019, 5, 11, 12, 00)
+//			)
+//	);
+//	adicionarJogo(rd,
+//			criarJogo(
+//					&campeonato->times[2],
+//					&campeonato->times[3],
+//					2,
+//					criarDataHora(2019, 5, 11, 12, 30)
+//			)
+//	);
+//	adicionarRodada(campeonato, rd);
+//
+//	rd = criarRodada(2);
+//		adicionarJogo(rd,
+//				criarJogo(
+//						&campeonato->times[0],
+//						&campeonato->times[2],
+//						1,
+//						criarDataHora(2019, 5, 12, 13, 30)
+//				)
+//		);
+//		adicionarJogo(rd,
+//				criarJogo(
+//						&campeonato->times[1],
+//						&campeonato->times[3],
+//						2,
+//						criarDataHora(2019, 5, 12, 14, 00)
+//				)
+//		);
+//	adicionarRodada(campeonato, rd);
+//
+//	rd = criarRodada(3);
+//		adicionarJogo(rd,
+//				criarJogo(
+//						&campeonato->times[0],
+//						&campeonato->times[3],
+//						1,
+//						criarDataHora(2019, 5, 13, 11, 15)
+//				)
+//		);
+//		adicionarJogo(rd,
+//				criarJogo(
+//						&campeonato->times[1],
+//						&campeonato->times[2],
+//						2,
+//						criarDataHora(2019, 5, 13, 11, 45)
+//				)
+//		);
+//	adicionarRodada(campeonato, rd);
 
 	return campeonato;
 }
@@ -336,6 +448,13 @@ void imprimeCampeonato(Campeonato *campeonato) {
 		imprimeRodada(&campeonato->rodadas[i]);
 	}
 	printf("\n");
+
+	printf("==== Times (%d) ====\n\n", campeonato->nTimes);
+	for (i=0; i<campeonato->nTimes; i++) {
+		imprimeTime(&campeonato->times[i]);
+	}
+	printf("\n");
+
 }
 void imprimeRodada(Rodada* rodada) {
 
@@ -343,8 +462,9 @@ void imprimeRodada(Rodada* rodada) {
 
 	printf("Rodada %i:\n", rodada->numero);
 	for (i=0; i<rodada->nJogos; i++) {
-		printf("\tJogo %i: %s [%i X %i] %s - %s \n",
+		printf("\tJogo %i (Mesa %d):\n\t- %s [%i X %i] %s - %s \n",
 				i+1,
+				rodada->jogos[i].mesa,
 				rodada->jogos[i].timeA->nome,
 				rodada->jogos[i].placar->timeA,
 				rodada->jogos[i].placar->timeB,
@@ -353,21 +473,18 @@ void imprimeRodada(Rodada* rodada) {
 	}
 	printf("\n");
 }
+void imprimeTime(Time *time) {
+
+	printf("Time: %s \n", time->nome);
+	printf("Fundacao: %s \n", time->fundacao->toString);
+	printf("Responsavel: %s \n", time->responsavel);
+
+	printf("\n");
+}
 void limparTela() {
 	// TODO validar caso seja windows
 	printf("\e[1;1H\e[2J");
 }
-
-void setMensagemAviso(char *msg) {
-	strcpy(_mensagem_aviso, msg);
-}
-void imprimeMensagemAviso() {
-	if(strcmp(_mensagem_aviso, "")) {
-		printf("%s", _mensagem_aviso);
-		strcpy(_mensagem_aviso, "");
-	}
-}
-
 
 
 
