@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "layout.h"
 
 #define ARQ_TIMES_DEFAULT "times.dat"
 #define ARQ_JOGOS_DEFAULT "jogos.dat"
+
+#define NOME_SISTEMA "Sistema de Controle de Jogos"
 
 // Data
 typedef struct {
@@ -36,34 +39,34 @@ typedef struct {
 
 // Jogo
 typedef struct {
-	Time *timeA;
-	Time *timeB;
+	Time* timeA;
+	Time* timeB;
 	int mesa;
-	Data *data;
+	Data* data;
 	int jaOcorreu;
-	Placar *placar;
+	Placar* placar;
 } Jogo;
 
 // Rodada
 typedef struct {
 	int numero;
 	int nJogos;
-	Jogo *jogos;
+	Jogo* jogos;
 } Rodada;
 
 // Campeonato
 typedef struct {
 	int ano;
 	int nRodadas;
-	Rodada *rodadas;
+	Rodada* rodadas;
 	int nTimes;
-	Time *times;
+	Time* times;
 } Campeonato;
 
 // Funcoes principais
 Data* criarData(int ano, int mes, int dia);
 Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto);
-Time* criarTime(char* nome, char* resp, Data *fund);
+Time* criarTime(char* nome, char* resp, Data* fund);
 Jogo* criarJogo(Time* timeA, Time* timeB, int mesa, Data* data);
 Jogo* informarPlacar(Jogo* jogo, int golsTimeA, int golsTimeB);
 Rodada* criarRodada(int numero);
@@ -87,32 +90,33 @@ char _mensagem_aviso[255];
 void setMensagemAviso(char *msg);
 void imprimeMensagemAviso();
 
+// Funcoes de tela
+void menuPrincipal();
+void imprimeMenuPrincipal();
+void menuCampeonatos();
+void imprimeMenuCampeonatos();
+void menuTimes();
+void imprimeMenuTimes();
+void menuJogos();
+void imprimeMenuJogos();
+void menuTabela();
+void imprimeMenuTabela();
 
 // Funcoes helpers
 Campeonato* criarCampeonatoFake();
 Campeonato* autoCriarRodadas(Campeonato* campeonato);
-void imprimeCampeonato(Campeonato *campeonato);
+void imprimeCampeonato(Campeonato* campeonato);
 void imprimeRodada(Rodada* rodada);
-void imprimeTime(Time *time);
-void limparTela();
-
+void imprimeTime(Time* time);
 
 // Funcao principal
 int main() {
 
-	limparTela();
+	menuPrincipal();
 
-	Campeonato *campeonato;
+	clearScreen();
 
-	campeonato = criarCampeonato(2019);
-	lerTimesDoArquivo(campeonato, ARQ_TIMES_DEFAULT);
-	lerJogosDoArquivo(campeonato, ARQ_JOGOS_DEFAULT);
-
-	imprimeCampeonato(campeonato);
-
-	salvarTimesNoArquivo(campeonato, "teste.dat");
-
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
@@ -142,7 +146,7 @@ Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto) {
 
 	return data;
 }
-Time* criarTime(char* nome, char* resp, Data *fund) {
+Time* criarTime(char* nome, char* resp, Data* fund) {
 
 	Time* time = (Time*)malloc(sizeof(Time));
 	strcpy(time->nome, nome);
@@ -198,7 +202,7 @@ Rodada* adicionarJogo(Rodada* rodada, Jogo* jogo) {
 }
 Campeonato* criarCampeonato(int ano) {
 
-	Campeonato *camp = (Campeonato*)malloc(sizeof(Campeonato));
+	Campeonato* camp = (Campeonato*)malloc(sizeof(Campeonato));
 	camp->ano = ano;
 	camp->nRodadas = 0;
 	camp->rodadas = (Rodada*)malloc(38*sizeof(Rodada));
@@ -250,7 +254,7 @@ Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero) {
 
 Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename) {
 
-	FILE *arquivo;
+	FILE* arquivo;
 	char msg[128];
 	int res = 0;
 
@@ -283,7 +287,7 @@ Campeonato* lerTimesDoArquivo(Campeonato* campeonato, char* filename) {
 }
 Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 
-	FILE *arquivo;
+	FILE* arquivo;
 	char msg[128];
 	int res = 0;
 
@@ -334,7 +338,7 @@ Campeonato* lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 
 Campeonato* salvarTimesNoArquivo(Campeonato* campeonato, char* filename) {
 
-	FILE *arquivo;
+	FILE* arquivo;
 	char msg[128];
 	int i;
 
@@ -356,8 +360,7 @@ Campeonato* salvarTimesNoArquivo(Campeonato* campeonato, char* filename) {
 	return campeonato;
 }
 
-
-void setMensagemAviso(char *msg) {
+void setMensagemAviso(char* msg) {
 	strcpy(_mensagem_aviso, msg);
 }
 void imprimeMensagemAviso() {
@@ -367,10 +370,252 @@ void imprimeMensagemAviso() {
 	}
 }
 
+void menuPrincipal() {
+
+	char opcao;
+
+	while (1) {
+		clearScreen();
+		imprimeMenuPrincipal();
+		printf("Digite sua opcao: ");
+		scanf(" %[^\n]", &opcao);
+
+		switch(opcao) {
+
+		case '1':
+			menuCampeonatos();
+			break;
+
+		case '2':
+			menuTimes();
+			break;
+
+		case '3':
+			menuJogos();
+			break;
+
+		case '4':
+			menuTabela();
+			break;
+
+		case '0':
+			return;
+		}
+	}
+}
+void imprimeMenuPrincipal() {
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line("Menu Principal", 'C');
+	filledLine();
+	emptyLine();
+	line("1. Campeonatos", 'L');
+	emptyLine();
+	line("2. Times", 'L');
+	emptyLine();
+	line("3. Jogos", 'L');
+	emptyLine();
+	line("4. Tabela de classificacao", 'L');
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	line("8. Restaurar/Redefinir dados", 'L');
+	emptyLine();
+	line("0. Sair", 'L');
+	emptyLine();
+	filledLine();
+}
+void menuCampeonatos() {
+
+	char opcao;
+
+	while (1) {
+
+		clearScreen();
+		imprimeMenuCampeonatos();
+		printf("Digite sua opcao: ");
+		scanf(" %[^\n]", &opcao);
+
+		switch(opcao) {
+
+		case '1':
+
+		case '0':
+			return;
+		}
+	}
+}
+void imprimeMenuCampeonatos() {
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line("Campeonatos", 'C');
+	filledLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	line("0. Menu Principal", 'L');
+	emptyLine();
+	filledLine();
+}
+void menuTimes(Campeonato* campeonato) {
+
+	char opcao;
+
+	while (1) {
+
+		clearScreen();
+		imprimeMenuTimes();
+		printf("Digite sua opcao: ");
+		scanf(" %[^\n]", &opcao);
+
+		switch(opcao) {
+
+		case '1':
+
+		case '0':
+			return;
+		}
+	}
+}
+void imprimeMenuTimes() {
+
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line("Times", 'C');
+	filledLine();
+	emptyLine();
+	line("1. Carregar do arquivo: times.dat", 'L');
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	line("0. Menu Principal", 'L');
+	emptyLine();
+	filledLine();
+}
+void menuJogos() {
+
+	char opcao;
+
+	while (1) {
+
+		clearScreen();
+		imprimeMenuJogos();
+		printf("Digite sua opcao: ");
+		scanf(" %[^\n]", &opcao);
+
+		switch(opcao) {
+
+		case '1':
+
+		case '0':
+			return;
+		}
+	}
+}
+void imprimeMenuJogos() {
+
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line("Jogos", 'C');
+	filledLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	line("0. Menu Principal", 'L');
+	emptyLine();
+	filledLine();
+}
+void menuTabela() {
+
+	char opcao;
+
+	while (1) {
+
+		clearScreen();
+		imprimeMenuTabela();
+		printf("Digite sua opcao: ");
+		scanf(" %[^\n]", &opcao);
+
+		switch(opcao) {
+
+		case '1':
+
+		case '0':
+			return;
+		}
+	}
+}
+void imprimeMenuTabela() {
+
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line("Tabela", 'C');
+	filledLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	emptyLine();
+	line("0. Menu Principal", 'L');
+	emptyLine();
+	filledLine();
+}
+
 
 Campeonato* criarCampeonatoFake() {
 
-	Campeonato *campeonato;
+	Campeonato* campeonato;
 	campeonato = criarCampeonato(2019);
 
 	campeonato = adicionarTime(campeonato, criarTime("Time A", "Jogador A",
@@ -471,7 +716,7 @@ Campeonato* autoCriarRodadas(Campeonato* campeonato) {
 	return campeonato;
 }
 
-void imprimeCampeonato(Campeonato *campeonato) {
+void imprimeCampeonato(Campeonato* campeonato) {
 
 	int i;
 
@@ -505,17 +750,13 @@ void imprimeRodada(Rodada* rodada) {
 	}
 	printf("\n");
 }
-void imprimeTime(Time *time) {
+void imprimeTime(Time* time) {
 
 	printf("Time: %s \n", time->nome);
 	printf("Fundacao: %s \n", time->fundacao->toString);
 	printf("Responsavel: %s \n", time->responsavel);
 
 	printf("\n");
-}
-void limparTela() {
-	// TODO validar caso seja windows
-	printf("\e[1;1H\e[2J");
 }
 
 
