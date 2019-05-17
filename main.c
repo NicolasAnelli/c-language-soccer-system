@@ -25,6 +25,8 @@ void setMensagemAviso(char *msg);
 void imprimeMensagemAviso();
 
 // Funcoes de tela
+void cabecalho();
+
 void menuPrincipal();
 void imprimeMenuPrincipal();
 void menuCampeonatos();
@@ -213,6 +215,13 @@ void imprimeMensagemAviso() {
 	}
 }
 
+void cabecalho(char* menu) {
+	filledLine();
+	line(NOME_SISTEMA, 'C');
+	line(menu, 'C');
+	filledLine();
+	imprimeMensagemAviso();
+}
 void menuPrincipal() {
 
 	char *opcao = (char*)malloc(sizeof(char));
@@ -270,11 +279,7 @@ void menuPrincipal() {
 	}
 }
 void imprimeMenuPrincipal() {
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Menu Principal", 'C');
-	filledLine();
-	imprimeMensagemAviso();
+	cabecalho("Menu Principal");
 	line("1. Campeonatos", 'L');
 	emptyLine();
 	line("2. Times", 'L');
@@ -317,11 +322,7 @@ void menuCampeonatos() {
 	}
 }
 void imprimeMenuCampeonatos() {
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Campeonatos", 'C');
-	filledLine();
-	emptyLine();
+	cabecalho("Campeonatos");
 	emptyLine();
 	emptyLine();
 	emptyLine();
@@ -372,11 +373,7 @@ void imprimeMenuTimes() {
 
 	char *aux = (char*)malloc(50*sizeof(char));
 
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Times", 'C');
-	filledLine();
-	emptyLine();
+	cabecalho("Times");
 	sprintf(aux, "1. Carregar do arquivo: %s", ARQ_TIMES_DEFAULT);
 	line(aux, 'L');
 	emptyLine();
@@ -477,11 +474,7 @@ void imprimeCadastroTime(char* nome, char* resp, Data* data) {
 
 	char *aux = (char*)malloc(80*sizeof(char));
 
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Times - Cadastro", 'C');
-	filledLine();
-	imprimeMensagemAviso();
+	cabecalho("Times - Cadastro");
 	sprintf(aux, "1. Nome do time:  %s", nome);
 	line(aux, 'L');
 	emptyLine();
@@ -537,11 +530,7 @@ void imprimeMenuJogos() {
 
 	char *aux = (char*)malloc(80*sizeof(char));
 
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Jogos", 'C');
-	filledLine();
-	imprimeMensagemAviso();
+	cabecalho("Jogos");
 	sprintf(aux, "1. Carregar do arquivo: %s", ARQ_JOGOS_DEFAULT);
 	line(aux, 'L');
 	emptyLine();
@@ -662,11 +651,7 @@ void imprimeCadastroJogo(char* nomeTimeA, char* nomeTimeB, Data* data, int mesa,
 
 	char *aux = (char*)malloc(80*sizeof(char));
 
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Jogos - Cadastro", 'C');
-	filledLine();
-	imprimeMensagemAviso();
+	cabecalho("Jogos - Cadastro");
 	sprintf(aux, "1. Nome do time A:  %s", nomeTimeA);
 	line(aux, 'L');
 	emptyLine();
@@ -717,11 +702,7 @@ void menuTabela() {
 }
 void imprimeMenuTabela() {
 
-	filledLine();
-	line(NOME_SISTEMA, 'C');
-	line("Tabela de classificacao", 'C');
-	filledLine();
-	emptyLine();
+	cabecalho("Tabela de classificacao");
 	emptyLine();
 	emptyLine();
 	emptyLine();
