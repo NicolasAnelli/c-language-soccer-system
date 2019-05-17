@@ -1,8 +1,8 @@
 /*
  * layout.h
  *
- *  Created on: 18 de ago de 2018
- *      Author: Nicolas
+ *  Created on: Aug 18, 2018
+ *      Author: nicolasanelli
  */
 
 #ifndef LAYOUT_H_
@@ -84,7 +84,12 @@ void emptyLine() {
 	line("",'C');
 }
 void clearScreen() {
+#if defined(_WIN32) || defined(_WIN64)
+	system("cls");
+#endif
+#if defined(__unix__) || defined(__APPLE__) || defined(__linux__)
 	printf("\e[1;1H\e[2J");
+#endif
 }
 
 #endif /* LAYOUT_H_ */
