@@ -42,11 +42,24 @@ typedef struct {
 	Placar* placar;
 } Jogo;
 
+// Linha
+typedef struct {
+	Time* time;
+	int pontos;
+} Linha;
+
+// Tabela
+typedef struct {
+	int nLinhas;
+	Linha* linhas;
+} Tabela;
+
 // Rodada
 typedef struct {
 	int numero;
 	int nJogos;
 	Jogo* jogos;
+	Tabela* tabela;
 } Rodada;
 
 // Campeonato
@@ -126,10 +139,14 @@ Rodada* criarRodada(int numero) {
 	rodada->numero = numero;
 	rodada->nJogos = 0;
 	rodada->jogos = (Jogo*)malloc(10*sizeof(Jogo));
+	rodada->tabela = (Tabela*)malloc(sizeof(Tabela));
 
 	return rodada;
 }
 void adicionarJogo(Rodada* rodada, Jogo* jogo) {
+
+	if(rodada->nJogos >= 10)
+		return;
 
 	rodada->jogos[rodada->nJogos] = *jogo;
 	rodada->nJogos += 1;
@@ -164,6 +181,53 @@ void adicionarRodada(Campeonato* campeonato, Rodada* rodada) {
 	campeonato->rodadas[campeonato->nRodadas] = *rodada;
 	campeonato->nRodadas += 1;
 	free(rodada);
+
+	int i, j;
+	Rodada aux;
+	for (i=0; i<campeonato->nRodadas; i++) {
+		for (j=i+1; j<campeonato->nRodadas; j++) {
+			if (campeonato->rodadas[i].numero > campeonato->rodadas[j].numero) {
+				aux = campeonato->rodadas[j];
+				campeonato->rodadas[j] = campeonato->rodadas[i];
+				campeonato->rodadas[i] = aux;
+			}
+		}
+	}
+}
+
+Linha* criarLinha(Time* time, int pontos) {
+
+	Linha* linha = (Linha*)malloc(sizeof(Linha));
+	linha->time = time;
+	linha->pontos = pontos;
+
+	return linha;
+}
+Tabela* criarTabela() {
+
+	Tabela* tabela = (Tabela*)malloc(sizeof(Tabela));
+	tabela->nLinhas = 0;
+	tabela->linhas = (Linha*)malloc(10*sizeof(Linha));
+
+	return tabela;
+}
+void adicionarLinha(Tabela* tabela, Linha* linha) {
+
+	tabela->linhas[tabela->nLinhas] = *linha;
+	free(linha);
+	tabela->nLinhas += 1;
+
+	int i, j;
+	Linha aux;
+	for (i=0; i<tabela->nLinhas; i++) {
+		for (j=i+1; j<tabela->nLinhas; j++) {
+			if (tabela->linhas[i].pontos < tabela->linhas[j].pontos) {
+				aux = tabela->linhas[j];
+				tabela->linhas[j] = tabela->linhas[i];
+				tabela->linhas[i] = aux;
+			}
+		}
+	}
 }
 
 Time* buscarTimePorNome(Campeonato* campeonato, char* nome) {

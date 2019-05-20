@@ -40,7 +40,7 @@ void imprimeMenuJogos();
 void telaCadastroJogo();
 void imprimeCadastroJogo(char* nomeTimeA, char* nomeTimeB, Data* data, int mesa, int rodada);
 void menuTabela();
-void imprimeMenuTabela();
+void imprimeMenuTabela(int nRodada);
 
 // Funcoes de debug
 Campeonato* criarCampeonatoFake();
@@ -322,15 +322,21 @@ void menuCampeonatos() {
 	}
 }
 void imprimeMenuCampeonatos() {
+
+	char *aux = (char*)malloc(80*sizeof(char));
+
 	cabecalho("Campeonatos");
+	sprintf(aux, "Campeonato %d", campeonato_->ano);
+	line(aux, 'C');
 	emptyLine();
+	sprintf(aux, "   Rodadas: %d", campeonato_->nRodadas);
+	line(aux, 'L');
 	emptyLine();
+	sprintf(aux, "   Times: %d", campeonato_->nTimes);
+	line(aux, 'L');
 	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
+	sprintf(aux, "   Jogos: %d", quantidadeJogos(campeonato_));
+	line(aux, 'L');
 	emptyLine();
 	emptyLine();
 	emptyLine();
@@ -341,6 +347,8 @@ void imprimeMenuCampeonatos() {
 	line("0. Voltar", 'L');
 	emptyLine();
 	filledLine();
+
+	free(aux);
 }
 void menuTimes() {
 
@@ -680,12 +688,13 @@ void imprimeCadastroJogo(char* nomeTimeA, char* nomeTimeB, Data* data, int mesa,
 }
 void menuTabela() {
 
+	int nRodada;
 	char *opcao = (char*)malloc(sizeof(char));
 
 	while (1) {
 
 		clearScreen();
-		imprimeMenuTabela();
+		imprimeMenuTabela(nRodada);
 		printf("Digite sua opcao: ");
 		scanf(" %[^\n]", opcao);
 
@@ -700,27 +709,32 @@ void menuTabela() {
 		}
 	}
 }
-void imprimeMenuTabela() {
+void imprimeMenuTabela(int nRodada) {
+
+	char* aux = (char*)malloc(80*sizeof(char));
 
 	cabecalho("Tabela de classificacao");
+	sprintf(aux, "Rodada %d", nRodada++);
+	line(aux, 'C');
 	emptyLine();
+	emptyLine(); // 1
+	emptyLine(); // 2
+	emptyLine(); // 3
+	emptyLine(); // 4
+	emptyLine(); // 5
+	emptyLine(); // 6
+	emptyLine(); // 7
+	emptyLine(); // 8
+	emptyLine(); // 9
+	emptyLine(); // 10
 	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
-	emptyLine();
+	line("1 - Anterior | Proxima - 2", 'C');
 	emptyLine();
 	line("0. Voltar", 'L');
 	emptyLine();
 	filledLine();
+
+	free(aux);
 }
 
 // Fake||Debug
@@ -778,7 +792,7 @@ Campeonato* criarCampeonatoFake() {
 	);
 	adicionarRodada(campeonato, rd);
 
-	rd = criarRodada(2);
+	rd = criarRodada(3);
 	adicionarJogo(rd,
 			criarJogo(
 					&campeonato->times[0],
@@ -797,7 +811,7 @@ Campeonato* criarCampeonatoFake() {
 	);
 	adicionarRodada(campeonato, rd);
 
-	rd = criarRodada(3);
+	rd = criarRodada(2);
 	adicionarJogo(rd,
 			criarJogo(
 					&campeonato->times[0],
@@ -833,7 +847,6 @@ void imprimeCampeonato(Campeonato* campeonato) {
 		imprimeTime(&campeonato->times[i]);
 	}
 	printf("\n");
-
 }
 void imprimeRodada(Rodada* rodada) {
 
