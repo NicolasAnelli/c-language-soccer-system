@@ -92,7 +92,7 @@ Data* criarDataHora(int ano, int mes, int dia, int hora, int minuto) {
 	data->minuto = minuto;
 
 	char str[10];
-	sprintf(str, " as %02d:%02d", data->hora, data->minuto);
+	sprintf(str, " as %2d:%02d", data->hora, data->minuto);
 	strcat(data->toString, str);
 
 	return data;
@@ -253,6 +253,66 @@ Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero) {
 	return NULL;
 }
 
+int calcularPontosDoTimeNaRodada(Rodada* rodada, char*nomeDoTime) {
+
+	int i;
+
+	for (i=0; i<rodada->nJogos; i++) {
+		if (!strcmp(rodada->jogos[i].timeA->nome, nomeDoTime)) {
+			if (!rodada->jogos[i].jaOcorreu) {
+				// Nao aconteceu ainda
+				return 0;
+			}
+			if(rodada->jogos[i].placar->timeA > rodada->jogos[i].placar->timeB) {
+				// Ganhou
+				return 3;
+			}
+			if(rodada->jogos[i].placar->timeA == rodada->jogos[i].placar->timeB) {
+				// Empatou
+				return 1;
+			}
+			if(rodada->jogos[i].placar->timeA < rodada->jogos[i].placar->timeB) {
+				// Perdeu
+				return 0;
+			}
+		} else if(!strcmp(rodada->jogos[i].timeB->nome, nomeDoTime)) {
+			if (!rodada->jogos[i].jaOcorreu) {
+				// Nao aconteceu ainda
+				return 0;
+			}
+			if(rodada->jogos[i].placar->timeB > rodada->jogos[i].placar->timeA) {
+				// Ganhou
+				return 3;
+			}
+			if(rodada->jogos[i].placar->timeB == rodada->jogos[i].placar->timeA) {
+				// Empatou
+				return 1;
+			}
+			if(rodada->jogos[i].placar->timeB < rodada->jogos[i].placar->timeA) {
+				// Perdeu
+				return 0;
+			}
+		}
+	}
+
+	return 0;
+}
+int calcularPontosDoTimeNoCampeonato(Campeonato* campeonato, char* nomeDoTime, int rodada) {
+
+	int i, j, sum=0;
+
+	for (i=0; i<campeonato->nRodadas; i++) {
+
+		if(i>rodada)
+			return sum;
+
+		for(j=0; j<campeonato->rodadas[i].nJogos; j++) {
+			sum += calcularPontosDoTimeNaRodada(&campeonato->rodadas[i], nomeDoTime);
+		}
+	}
+
+	return sum;
+}
 int quantidadeJogos(Campeonato* campeonato) {
 
 	int i, sum = 0;

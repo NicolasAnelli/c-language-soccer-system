@@ -47,6 +47,7 @@ Campeonato* criarCampeonatoFake();
 void imprimeCampeonato(Campeonato* campeonato);
 void imprimeRodada(Rodada* rodada);
 void imprimeTime(Time* time);
+void imprimeTabela(Tabela* tabela);
 
 Campeonato* campeonato_;
 int main() {
@@ -106,7 +107,6 @@ void lerJogosDoArquivo(Campeonato* campeonato, char* filename) {
 	int res = 0;
 
 	Rodada *rodada;
-	Jogo *jogo;
 
 	Time* timeA;
 	Time* timeB;
@@ -270,6 +270,13 @@ void menuPrincipal() {
 		case 'F':
 			free(campeonato_);
 			campeonato_ = criarCampeonatoFake();
+			break;
+
+		// Test with files
+		case 't':
+		case 'T':
+			lerTimesDoArquivo(campeonato_, ARQ_TIMES_DEFAULT);
+			lerJogosDoArquivo(campeonato_, ARQ_JOGOS_DEFAULT);
 			break;
 
 		case '0':
@@ -688,7 +695,7 @@ void imprimeCadastroJogo(char* nomeTimeA, char* nomeTimeB, Data* data, int mesa,
 }
 void menuTabela() {
 
-	int nRodada;
+	int nRodada = 0;
 	char *opcao = (char*)malloc(sizeof(char));
 
 	while (1) {
@@ -701,6 +708,13 @@ void menuTabela() {
 		switch(*opcao) {
 
 		case '1':
+			if(nRodada > 0)
+				nRodada--;
+			break;
+
+		case '2':
+			if(nRodada < (campeonato_->nRodadas-1))
+				nRodada++;
 			break;
 
 		case '0':
@@ -711,22 +725,28 @@ void menuTabela() {
 }
 void imprimeMenuTabela(int nRodada) {
 
+	int i;
 	char* aux = (char*)malloc(80*sizeof(char));
 
+	Tabela* tabela = criarTabela();
+	for (i=0; i<campeonato_->nTimes; i++) {
+		adicionarLinha(tabela,
+				criarLinha(&campeonato_->times[i],
+				calcularPontosDoTimeNoCampeonato(campeonato_,campeonato_->times[i].nome, nRodada)));
+	}
+
 	cabecalho("Tabela de classificacao");
-	sprintf(aux, "Rodada %d", nRodada++);
+	sprintf(aux, "Rodada %d", nRodada+1);
 	line(aux, 'C');
 	emptyLine();
-	emptyLine(); // 1
-	emptyLine(); // 2
-	emptyLine(); // 3
-	emptyLine(); // 4
-	emptyLine(); // 5
-	emptyLine(); // 6
-	emptyLine(); // 7
-	emptyLine(); // 8
-	emptyLine(); // 9
-	emptyLine(); // 10
+	for (i=0; i<10; i++) {
+		if (campeonato_->nTimes > i) {
+			sprintf(aux, "  %02d | %02d .....  %s", i+1, tabela->linhas[i].pontos, tabela->linhas[i].time->nome);
+			line(aux, 'L');
+		} else {
+			emptyLine();
+		}
+	}
 	emptyLine();
 	line("1 - Anterior | Proxima - 2", 'C');
 	emptyLine();
@@ -735,6 +755,7 @@ void imprimeMenuTabela(int nRodada) {
 	filledLine();
 
 	free(aux);
+	free(tabela);
 }
 
 // Fake||Debug
@@ -873,7 +894,15 @@ void imprimeTime(Time* time) {
 
 	printf("\n");
 }
+void imprimeTabela(Tabela* tabela) {
 
+	int i;
+	printf("Tabela: \n");
+	for (i=0; i<tabela->nLinhas; i++) {
+		printf("\t %s - %d\n", tabela->linhas[i].time->nome, tabela->linhas[i].pontos);
+	}
+	printf("\n");
+}
 
 
 
