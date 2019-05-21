@@ -46,6 +46,10 @@ typedef struct {
 typedef struct {
 	Time* time;
 	int pontos;
+	int vitorias;
+	int golsPro;
+	int saldo;
+	int golsSofr;
 } Linha;
 
 // Tabela
@@ -195,11 +199,16 @@ void adicionarRodada(Campeonato* campeonato, Rodada* rodada) {
 	}
 }
 
-Linha* criarLinha(Time* time, int pontos) {
+Linha* criarLinha(Time* time, int pontos, int vitorias, int golsPro) {
 
 	Linha* linha = (Linha*)malloc(sizeof(Linha));
 	linha->time = time;
 	linha->pontos = pontos;
+	linha->vitorias = vitorias;
+	linha->golsPro = golsPro;
+	linha->saldo = 0;
+	linha->golsSofr = 0;
+
 
 	return linha;
 }
@@ -253,7 +262,7 @@ Rodada* buscarRodadaPeloNumero(Campeonato* campeonato, int numero) {
 	return NULL;
 }
 
-int calcularPontosDoTimeNaRodada(Rodada* rodada, char*nomeDoTime) {
+int obterPontosDoTimeNaRodada(Rodada* rodada, char* nomeDoTime) {
 
 	int i;
 
@@ -307,12 +316,91 @@ int calcularPontosDoTimeNoCampeonato(Campeonato* campeonato, char* nomeDoTime, i
 			return sum;
 
 		for(j=0; j<campeonato->rodadas[i].nJogos; j++) {
-			sum += calcularPontosDoTimeNaRodada(&campeonato->rodadas[i], nomeDoTime);
+			sum += obterPontosDoTimeNaRodada(&campeonato->rodadas[i], nomeDoTime);
 		}
 	}
 
 	return sum;
 }
+int verificarSeTimeGanhouNaRodada(Rodada* rodada, char* nomeDoTime) {
+
+	int i;
+
+	for (i=0; i<rodada->nJogos; i++) {
+		if (!strcmp(rodada->jogos[i].timeA->nome, nomeDoTime)) {
+			if (!rodada->jogos[i].jaOcorreu) {
+				// Nao aconteceu ainda
+				return 0;
+			}
+			if(rodada->jogos[i].placar->timeA > rodada->jogos[i].placar->timeB) {
+				// Ganhou
+				return 1;
+			} else {
+				return 0;
+			}
+		} else if(!strcmp(rodada->jogos[i].timeB->nome, nomeDoTime)) {
+			if (!rodada->jogos[i].jaOcorreu) {
+				// Nao aconteceu ainda
+				return 0;
+			}
+			if(rodada->jogos[i].placar->timeB > rodada->jogos[i].placar->timeA) {
+				// Ganhou
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	}
+
+	return 0;
+}
+int calcularVitoriasDoTimeNoCamponato(Campeonato* campeonato, char* nomeDoTime, int rodada) {
+
+	int i, j, sum=0;
+
+	for (i=0; i<campeonato->nRodadas; i++) {
+
+		if(i>rodada)
+			return sum;
+
+		for(j=0; j<campeonato->rodadas[i].nJogos; j++) {
+			sum += verificarSeTimeGanhouNaRodada(&campeonato->rodadas[i], nomeDoTime);
+		}
+	}
+
+	return sum;
+}
+int obterGolsDoTimeNaRodada(Rodada* rodada, char* nomeDoTime) {
+
+	int i;
+
+	for (i=0; i<rodada->nJogos; i++) {
+		if (!strcmp(rodada->jogos[i].timeA->nome, nomeDoTime)) {
+			return rodada->jogos[i].placar->timeA;
+		} else if(!strcmp(rodada->jogos[i].timeB->nome, nomeDoTime)) {
+			return rodada->jogos[i].placar->timeB;
+		}
+	}
+
+	return 0;
+}
+int calcularGolsDoTimeNoCampeonato(Campeonato* campeonato, char* nomeDoTime, int rodada) {
+
+	int i, j, sum=0;
+
+	for (i=0; i<campeonato->nRodadas; i++) {
+
+		if(i>rodada)
+			return sum;
+
+		for(j=0; j<campeonato->rodadas[i].nJogos; j++) {
+			sum += obterGolsDoTimeNaRodada(&campeonato->rodadas[i], nomeDoTime);
+		}
+	}
+
+	return sum;
+}
+
 int quantidadeJogos(Campeonato* campeonato) {
 
 	int i, sum = 0;

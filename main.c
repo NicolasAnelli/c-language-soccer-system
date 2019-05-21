@@ -773,16 +773,23 @@ void imprimeMenuTabela(int nRodada) {
 	for (i=0; i<campeonato_->nTimes; i++) {
 		adicionarLinha(tabela,
 				criarLinha(&campeonato_->times[i],
-				calcularPontosDoTimeNoCampeonato(campeonato_,campeonato_->times[i].nome, nRodada)));
+				calcularPontosDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada),
+				calcularVitoriasDoTimeNoCamponato(campeonato_, campeonato_->times[i].nome, nRodada),
+				calcularGolsDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada)));
 	}
 
 	cabecalho("Tabela de classificacao");
 	sprintf(aux, "Rodada %d", nRodada+1);
 	line(aux, 'C');
-	emptyLine();
+	line("  PO | PT | VT | GP |  Time", 'L');
 	for (i=0; i<10; i++) {
 		if (campeonato_->nTimes > i) {
-			sprintf(aux, "  %02d | %02d .....  %s", i+1, tabela->linhas[i].pontos, tabela->linhas[i].time->nome);
+			sprintf(aux, "  %02d | %02d | %02d | %02d | %s",
+					i+1,
+					tabela->linhas[i].pontos,
+					tabela->linhas[i].vitorias,
+					tabela->linhas[i].golsPro,
+					tabela->linhas[i].time->nome);
 			line(aux, 'L');
 		} else {
 			emptyLine();
