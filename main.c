@@ -18,6 +18,7 @@
 void lerTimesDoArquivo(Campeonato* campeonato, char* filename);
 void lerJogosDoArquivo(Campeonato* campeonato, char* filename);
 void salvarTimesNoArquivo(Campeonato* campeonato, char* filename);
+void salvarJogosNoArquivo(Campeonato* campeonato, char* filename);
 
 // Funcoes de aviso
 char _mensagem_aviso[255];
@@ -202,6 +203,40 @@ void salvarTimesNoArquivo(Campeonato* campeonato, char* filename) {
 
 	fclose(arquivo);
 }
+void salvarJogosNoArquivo(Campeonato* campeonato, char* filename) {
+
+	FILE* arquivo;
+	char *msg;
+	int i, j;
+
+	arquivo = fopen(filename, "w");
+	if (!arquivo) {
+		msg = malloc(80*sizeof(char));
+		sprintf(msg, "Nao foi possivel abrir %s para salvar os times.", filename);
+		setMensagemAviso(msg);
+		free(msg);
+		return;
+	}
+
+	for (i=0; i<campeonato->nRodadas; i++) {
+		for (j=0; j< campeonato->rodadas[i].nJogos; j++) {
+			fprintf(arquivo, "%d,%d-%d-%d,%02d:%d,%d,%s,%s,%d,%d\n",
+							campeonato->rodadas[i].numero,
+							campeonato->rodadas[i].jogos[j].data->ano,
+							campeonato->rodadas[i].jogos[j].data->mes,
+							campeonato->rodadas[i].jogos[j].data->dia,
+							campeonato->rodadas[i].jogos[j].data->hora,
+							campeonato->rodadas[i].jogos[j].data->minuto,
+							campeonato->rodadas[i].jogos[j].mesa,
+							campeonato->rodadas[i].jogos[j].timeA->nome,
+							campeonato->rodadas[i].jogos[j].timeB->nome,
+							campeonato->rodadas[i].jogos[j].placar->timeA,
+							campeonato->rodadas[i].jogos[j].placar->timeB);
+		}
+	}
+
+	fclose(arquivo);
+}
 
 void setMensagemAviso(char* msg) {
 	strcpy(_mensagem_aviso, msg);
@@ -250,6 +285,12 @@ void menuPrincipal() {
 			menuTabela();
 			break;
 
+		case '5':
+			salvarTimesNoArquivo(campeonato_, ARQ_TIMES_DEFAULT);
+			salvarJogosNoArquivo(campeonato_, ARQ_JOGOS_DEFAULT);
+			setMensagemAviso("Dados salvos com sucesso!");
+			break;
+
 		case '8':
 			free(campeonato_);
 			campeonato_ = criarCampeonato(2019);
@@ -295,7 +336,7 @@ void imprimeMenuPrincipal() {
 	emptyLine();
 	line("4. Tabela de classificacao", 'L');
 	emptyLine();
-	emptyLine();
+	line("5. Salvar dados", 'L');
 	emptyLine();
 	emptyLine();
 	emptyLine();
