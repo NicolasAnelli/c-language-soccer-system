@@ -775,20 +775,25 @@ void imprimeMenuTabela(int nRodada) {
 				criarLinha(&campeonato_->times[i],
 				calcularPontosDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada),
 				calcularVitoriasDoTimeNoCamponato(campeonato_, campeonato_->times[i].nome, nRodada),
-				calcularGolsDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada)));
+				calcularGolsDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada),
+				calcularSaldoDoTimeNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada),
+				calcularGolsSofridosNoCampeonato(campeonato_, campeonato_->times[i].nome, nRodada)));
 	}
 
 	cabecalho("Tabela de classificacao");
 	sprintf(aux, "Rodada %d", nRodada+1);
 	line(aux, 'C');
-	line("  PO | PT | VT | GP |  Time", 'L');
+	emptyLine();
+	line("    PO | PT | VT | GP | SD | GS | Time", 'L');
 	for (i=0; i<10; i++) {
 		if (campeonato_->nTimes > i) {
-			sprintf(aux, "  %02d | %02d | %02d | %02d | %s",
+			sprintf(aux, "    %02d | %02d | %02d | %02d | %02d | %02d | %s",
 					i+1,
 					tabela->linhas[i].pontos,
 					tabela->linhas[i].vitorias,
 					tabela->linhas[i].golsPro,
+					tabela->linhas[i].saldo,
+					tabela->linhas[i].golsSofr,
 					tabela->linhas[i].time->nome);
 			line(aux, 'L');
 		} else {
@@ -797,7 +802,6 @@ void imprimeMenuTabela(int nRodada) {
 	}
 	emptyLine();
 	line("1 - Anterior | Proxima - 2", 'C');
-	emptyLine();
 	line("0. Voltar", 'L');
 	emptyLine();
 	filledLine();
@@ -811,16 +815,16 @@ Campeonato* criarCampeonatoFake() {
 
 	Campeonato* campeonato = criarCampeonato(2019);
 
-	adicionarTime(campeonato, criarTime("Time A", "Jogador A",
+	adicionarTime(campeonato, criarTime("Computacao", "Jogador A",
 			criarData(2007, 2, 5)
 	));
-	adicionarTime(campeonato, criarTime("Time B", "Jogador B",
+	adicionarTime(campeonato, criarTime("Jogos Digitais", "Jogador B",
 			criarData(2008, 3, 6)
 	));
-	adicionarTime(campeonato, criarTime("Time C", "Jogador C",
+	adicionarTime(campeonato, criarTime("Psicologia", "Jogador C",
 			criarData(2009, 4, 7)
 	));
-	adicionarTime(campeonato, criarTime("Time D", "Jogador D",
+	adicionarTime(campeonato, criarTime("Design Grafico", "Jogador D",
 			criarData(2010, 5, 8)
 	));
 //	adicionarTime(campeonato, criarTime("Time E", "Jogador E",
@@ -844,57 +848,69 @@ Campeonato* criarCampeonatoFake() {
 
 	Rodada *rd = criarRodada(1);
 	adicionarJogo(rd,
-			criarJogo(
+			criarJogoComPlacar(
 					&campeonato->times[0],
 					&campeonato->times[1],
 					1,
-					criarDataHora(2019, 5, 11, 12, 00)
+					criarDataHora(2019, 5, 11, 12, 00),
+					2,
+					1
 			)
 	);
 	adicionarJogo(rd,
-			criarJogo(
+			criarJogoComPlacar(
 					&campeonato->times[2],
 					&campeonato->times[3],
 					2,
-					criarDataHora(2019, 5, 11, 12, 30)
-			)
-	);
-	adicionarRodada(campeonato, rd);
-
-	rd = criarRodada(3);
-	adicionarJogo(rd,
-			criarJogo(
-					&campeonato->times[0],
-					&campeonato->times[2],
-					1,
-					criarDataHora(2019, 5, 12, 13, 30)
-			)
-	);
-	adicionarJogo(rd,
-			criarJogo(
-					&campeonato->times[1],
-					&campeonato->times[3],
-					2,
-					criarDataHora(2019, 5, 12, 14, 00)
+					criarDataHora(2019, 5, 11, 12, 30),
+					0,
+					0
 			)
 	);
 	adicionarRodada(campeonato, rd);
 
 	rd = criarRodada(2);
 	adicionarJogo(rd,
-			criarJogo(
+			criarJogoComPlacar(
 					&campeonato->times[0],
-					&campeonato->times[3],
+					&campeonato->times[2],
 					1,
-					criarDataHora(2019, 5, 13, 11, 15)
+					criarDataHora(2019, 5, 12, 13, 30),
+					2,
+					2
 			)
 	);
 	adicionarJogo(rd,
-			criarJogo(
+			criarJogoComPlacar(
+					&campeonato->times[1],
+					&campeonato->times[3],
+					2,
+					criarDataHora(2019, 5, 12, 14, 00),
+					0,
+					0
+			)
+	);
+	adicionarRodada(campeonato, rd);
+
+	rd = criarRodada(3);
+	adicionarJogo(rd,
+			criarJogoComPlacar(
+					&campeonato->times[0],
+					&campeonato->times[3],
+					1,
+					criarDataHora(2019, 5, 13, 11, 15),
+					0,
+					0
+			)
+	);
+	adicionarJogo(rd,
+			criarJogoComPlacar(
 					&campeonato->times[1],
 					&campeonato->times[2],
 					2,
-					criarDataHora(2019, 5, 13, 11, 45)
+					criarDataHora(2019, 5, 13, 11, 45),
+					0,
+					1
 			)
 	);
 	adicionarRodada(campeonato, rd);
