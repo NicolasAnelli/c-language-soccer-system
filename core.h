@@ -221,6 +221,7 @@ Tabela* criarTabela() {
 }
 void adicionarLinha(Tabela* tabela, Linha* linha) {
 
+	int troca;
 	tabela->linhas[tabela->nLinhas] = *linha;
 	free(linha);
 	tabela->nLinhas += 1;
@@ -229,7 +230,27 @@ void adicionarLinha(Tabela* tabela, Linha* linha) {
 	Linha aux;
 	for (i=0; i<tabela->nLinhas; i++) {
 		for (j=i+1; j<tabela->nLinhas; j++) {
+			troca = 0;
 			if (tabela->linhas[i].pontos < tabela->linhas[j].pontos) {
+				troca = 1;
+			} else if (tabela->linhas[i].pontos == tabela->linhas[j].pontos) {
+				if (tabela->linhas[i].vitorias < tabela->linhas[j].vitorias) {
+					troca = 1;
+				} else if (tabela->linhas[i].vitorias == tabela->linhas[j].vitorias) {
+					if (tabela->linhas[i].golsPro < tabela->linhas[j].golsPro) {
+						troca = 1;
+					} else if (tabela->linhas[i].golsPro == tabela->linhas[j].golsPro) {
+						if (tabela->linhas[i].saldo < tabela->linhas[j].saldo) {
+							troca = 1;
+						} else if (tabela->linhas[i].saldo == tabela->linhas[j].saldo) {
+							if (tabela->linhas[i].saldo > tabela->linhas[j].saldo) {
+								troca = 1;
+							}
+						}
+					}
+				}
+			}
+			if (troca) {
 				aux = tabela->linhas[j];
 				tabela->linhas[j] = tabela->linhas[i];
 				tabela->linhas[i] = aux;
